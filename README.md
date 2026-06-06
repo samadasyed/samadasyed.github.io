@@ -29,7 +29,31 @@ python3 -m http.server 8000
 # then visit http://localhost:8000
 ```
 
-## Deploy (GitHub Pages)
+## Publishing changes
 
-See the setup notes — once the repo is pushed and Pages is enabled, every push to the
-`main` branch publishes automatically.
+The site auto-deploys from the `main` branch. To push an update:
+
+```bash
+git add -A
+git commit -m "describe your change"
+git push
+```
+
+The live site at https://samadsyed.com updates within ~1 minute.
+
+## Hosting setup (for reference)
+
+- **Host:** GitHub Pages, repo `samadasyed/samadasyed.github.io`, deploy from `main` / root.
+- **Domain:** `samadsyed.com`, registered on Cloudflare (DNS managed there).
+- **Custom domain:** set by the `CNAME` file in this repo + the Pages settings.
+- **DNS records on Cloudflare** (all set to "DNS only" / grey cloud):
+  - Four `A` records on `@` → `185.199.108.153`, `.109.153`, `.110.153`, `.111.153`
+  - Four `AAAA` records on `@` → `2606:50c0:8000::153` through `:8003::153`
+  - One `CNAME`: `www` → `samadasyed.github.io` (redirects www to the bare domain)
+- **HTTPS:** "Enforce HTTPS" is enabled in the repo's Pages settings.
+
+## To do later
+
+- Add `photo-1.jpg`, `photo-2.jpg`, `photo-3.jpg` to `assets/` for the photo strip.
+- Add a redacted resume and point the "Resume" link (currently `#`) at it.
+- Re-enable the Writing section in `index.html` once there are posts.
