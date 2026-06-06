@@ -29,28 +29,47 @@
     <header>
       <h1 class="name">Samad Syed</h1>
 
-      <!-- Top links. Delete any line you don't want; add real URLs.
-           To remove the photo entirely, delete the <img> below. -->
+      <!-- Top links. Delete any line you don't want; add real URLs. -->
       <nav class="links">
-        <a href="mailto:samadds19@gmail.com">Email</a>
+        <a href="mailto:samadasyed@hotmail.com">Email</a>
         <a href="https://github.com/samadasyed" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://www.linkedin.com/in/REPLACE_ME" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="https://x.com/REPLACE_ME" target="_blank" rel="noopener">Twitter</a>
-        <a href="assets/resume.pdf" target="_blank" rel="noopener">Resume</a>
+        <a href="https://www.linkedin.com/in/samad-syed/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://x.com/samadsyed" target="_blank" rel="noopener">Twitter</a>
+        <!-- TODO: replace "#" with the resume URL once the redacted PDF is ready. -->
+        <a href="#" target="_blank" rel="noopener">Resume</a>
       </nav>
     </header>
+
+    <!-- ============================================================
+         PHOTOS  —  three images side by side
+         Drop your files in assets/ named photo-1.jpg, photo-2.jpg,
+         photo-3.jpg (or change the src/alt below). Remove a <figure>
+         to show fewer than three.
+         ============================================================ -->
+    <section id="photos">
+      <div class="photo-grid">
+        <figure class="photo">
+          <img src="assets/photo-1.jpg" alt="Photo 1" loading="lazy" />
+        </figure>
+        <figure class="photo">
+          <img src="assets/photo-2.jpg" alt="Photo 2" loading="lazy" />
+        </figure>
+        <figure class="photo">
+          <img src="assets/photo-3.jpg" alt="Photo 3" loading="lazy" />
+        </figure>
+      </div>
+    </section>
 
     <!-- ============================================================
          ABOUT / BIO
          ============================================================ -->
     <section id="about">
       <p>
-        I'm a computer scientist, engineer, and researcher &mdash; drawn to the
-        polymath's path across modern CS. I care about building things that work
-        and understanding why they work, which keeps me moving between research
-        questions and open-source engineering.
-        <!-- REPLACE with 2–4 sentences in your own voice: what you study,
-             what you build, and what you're looking to do next. -->
+        I'm a computer scientist, engineer, and researcher, and a senior studying
+        Computer Science at the University of Wisconsin&ndash;Madison. I like working
+        close to the metal &mdash; systems, compilers, and performance, mostly in C++.
+        I've built distributed storage tooling at AWS and low-level developer tools in
+        the open, and I'm drawn to work that lives between research and engineering.
       </p>
     </section>
 
@@ -64,13 +83,13 @@
       <ul class="entries">
         <li>
           <div class="entry-head">
-            <span class="entry-title">University Name</span>
-            <span class="entry-date">2022 &ndash; 2026</span>
+            <span class="entry-title">University of Wisconsin&ndash;Madison</span>
+            <span class="entry-date">Sep 2022 &ndash; May 2026</span>
           </div>
           <div class="entry-sub">B.S. in Computer Science</div>
           <p class="entry-desc">
-            Relevant coursework, honors, GPA, or notable accomplishments go here.
-            <!-- REPLACE: add awards, research, leadership, etc. -->
+            BANNER Scholarship &middot; Dean's List (3&times;) &middot; ICPC Regionalist &middot; CMU Hackathon Winner.
+            Coursework across systems, compilers, algorithms, and deep learning for NLP.
           </p>
         </li>
       </ul>
@@ -86,21 +105,39 @@
       <ul class="entries">
         <li>
           <div class="entry-head">
-            <span class="entry-title">Role &middot; Company</span>
-            <span class="entry-date">Summer 2025</span>
+            <span class="entry-title">Software Development Engineer Intern &middot; Amazon Web Services</span>
+            <span class="entry-date">May &ndash; Aug 2025</span>
           </div>
+          <div class="entry-sub">Aurora Storage Team &middot; Redmond, WA</div>
           <p class="entry-desc">
-            One or two lines on what you did and the impact you had.
-            <!-- REPLACE per role. Copy this <li> block for each job. -->
+            Designed and built an automatic rollback for storage segments in C++ that shrank
+            worst-case upgrade failures from 5&ndash;8 hours to 5&ndash;15 minutes on large-volume
+            clusters, and reconstructed copy-on-write delta chains to restore known-good states
+            across replicas. Also built Python anomaly-detection tooling computing fleet-wide
+            failure rates for EC2/Aurora.
           </p>
         </li>
         <li>
           <div class="entry-head">
-            <span class="entry-title">Role &middot; Company</span>
-            <span class="entry-date">2024</span>
+            <span class="entry-title">Undergraduate Teaching Assistant &middot; UW&ndash;Madison</span>
+            <span class="entry-date">Sep 2024 &ndash; May 2025</span>
           </div>
+          <div class="entry-sub">Algorithms &amp; Operating Systems</div>
           <p class="entry-desc">
-            One or two lines on what you did and the impact you had.
+            TA'd Algorithms (Spring 2025) and Operating Systems (Fall 2024), leading weekly
+            discussion sections and study groups and supporting 300+ students across the year.
+          </p>
+        </li>
+        <li>
+          <div class="entry-head">
+            <span class="entry-title">C++ Software Engineering Intern &middot; Vail Systems</span>
+            <span class="entry-date">Jun &ndash; Aug 2024</span>
+          </div>
+          <div class="entry-sub">Voice Engineering Team &middot; Chicago, IL</div>
+          <p class="entry-desc">
+            Built VOTS, a C++ IVR platform that streams live market data, prices options with
+            Black&ndash;Scholes, and voices 10+ real-time metrics at sub-second latency. Delivered
+            7 Modern C++ tech talks (lambdas, smart pointers, coroutines, concurrency) to the team.
           </p>
         </li>
       </ul>
@@ -113,26 +150,36 @@
          ============================================================ -->
     <section id="projects">
       <h2>Projects</h2>
+      <!-- More projects coming soon — copy an <li> block below for each new one,
+           and swap the href to the specific repo URL when it's public. -->
       <ul class="entries">
         <li>
           <div class="entry-head">
             <span class="entry-title">
-              <a href="https://github.com/REPLACE_ME" target="_blank" rel="noopener">Project Name</a>
+              <a href="https://github.com/RonaldMishiev/LocalBolt" target="_blank" rel="noopener">LocalBolt</a>
             </span>
+            <span class="entry-date">C++ &middot; Assembly &middot; Python</span>
           </div>
+          <div class="entry-sub">Local C/C++ assembly compiler explorer</div>
           <p class="entry-desc">
-            A short description of what the project does and why it's interesting.
-            <!-- REPLACE. Copy this <li> block for each project. -->
+            A local, offline compiler-tooling workflow on top of LLVM/Clang that generates
+            readable demangled assembly and surfaces instruction-level performance signals via
+            <code>llvm-mca</code> in a TUI. Approved by Matt Godbolt; won "Best Innovation without
+            AI" at the Carnegie Mellon hackathon.
           </p>
         </li>
         <li>
           <div class="entry-head">
             <span class="entry-title">
-              <a href="https://github.com/REPLACE_ME" target="_blank" rel="noopener">Project Name</a>
+              <a href="https://github.com/samadasyed/AgentPredict" target="_blank" rel="noopener">AgentPredict</a>
             </span>
+            <span class="entry-date">C++ &middot; Python</span>
           </div>
+          <div class="entry-sub">UFC Polymarket odds explainer &middot; in progress</div>
           <p class="entry-desc">
-            A short description of what the project does and why it's interesting.
+            A real-time UFC prediction platform that tracks live Polymarket probability shifts,
+            integrates live fight data, and delivers streaming market events with agentic RAG
+            analysis through a browser dashboard.
           </p>
         </li>
       </ul>
@@ -141,23 +188,23 @@
     <hr />
 
     <!-- ============================================================
-         WRITING  (delete this section if you don't have posts yet)
+         WRITING  —  hidden for now (no posts yet). To turn it on,
+         delete the two comment lines wrapping the <section> below.
          ============================================================ -->
+    <!--
     <section id="writing">
       <h2>Writing</h2>
       <ul class="entries">
         <li>
           <div class="entry-head">
-            <span class="entry-title">
-              <a href="#" target="_blank" rel="noopener">Title of a post</a>
-            </span>
+            <span class="entry-title"><a href="#">Title of a post</a></span>
             <span class="entry-date">2026</span>
           </div>
         </li>
       </ul>
     </section>
-
     <hr />
+    -->
 
     <!-- ============================================================
          CONTACT  /  FOOTER
@@ -165,7 +212,7 @@
     <footer id="contact">
       <p>
         The best way to reach me is by email at
-        <a href="mailto:samadds19@gmail.com">samadds19@gmail.com</a>.
+        <a href="mailto:samadasyed@hotmail.com">samadasyed@hotmail.com</a>.
       </p>
       <p class="updated">Last updated June 2026</p>
     </footer>
