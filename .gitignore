@@ -1,3 +1,6 @@
 .DS_Store
 Thumbs.db
 *.log
+
+# Local-only agent handoff doc (contains personal contact info — do not publish)
+AGENT_CONTEXT.md
