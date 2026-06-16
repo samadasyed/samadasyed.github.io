@@ -230,19 +230,36 @@ async function start() {
     state.captureStream = await navigator.mediaDevices.getDisplayMedia({
       video: true,
       audio: {
+        // By default Chrome strips audio that originates from the capturing tab
+        // (anti-feedback "restrictOwnAudio"). That silences an embedded player
+        // when you share THIS tab. Ask to keep the tab's own audio.
+        restrictOwnAudio: false,
         echoCancellation: false,
         noiseSuppression: false,
         autoGainControl: false,
       },
     });
   } catch (err) {
+    console.warn("[capture] getDisplayMedia failed:", err);
     setStatus("SCREEN SHARE CANCELLED", "error");
     els.startBtn.disabled = false;
     return;
   }
   const audioTracks = state.captureStream.getAudioTracks();
+  // Diagnostics: what did the browser actually give us?
+  console.log(
+    "[capture] audio tracks:", audioTracks.length,
+    audioTracks[0]
+      ? {
+          label: audioTracks[0].label,
+          muted: audioTracks[0].muted,
+          readyState: audioTracks[0].readyState,
+          settings: audioTracks[0].getSettings(),
+        }
+      : "(none)"
+  );
   if (!audioTracks.length) {
-    setStatus("NO AUDIO SHARED — TICK ‘SHARE TAB AUDIO’", "error");
+    setStatus("NO AUDIO SHARED — PICK A TAB & TICK ‘SHARE TAB AUDIO’", "error");
     cleanupCapture();
     els.startBtn.disabled = false;
     return;
