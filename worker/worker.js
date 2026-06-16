@@ -37,7 +37,11 @@ export default {
     }
 
     // Open the upstream WebSocket to Gemini, authenticated with the secret key.
-    const upstreamUrl = `${GEMINI_WS}?key=${env.GEMINI_API_KEY}`;
+    // AUTH_PARAM defaults to "key" (standard API key). If your credential is an
+    // ephemeral/access token instead, set AUTH_PARAM = "access_token".
+    const authParam = (env.AUTH_PARAM || "key").trim();
+    const upstreamUrl =
+      `${GEMINI_WS}?${authParam}=${encodeURIComponent(env.GEMINI_API_KEY)}`;
     let upstream;
     try {
       const resp = await fetch(upstreamUrl, {
