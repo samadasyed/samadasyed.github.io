@@ -229,6 +229,9 @@ async function start() {
   try {
     state.captureStream = await navigator.mediaDevices.getDisplayMedia({
       video: true,
+      // Chrome excludes the calling tab from the picker by default, so THIS tab
+      // (with the embedded player) never appears as a shareable option. Include it.
+      selfBrowserSurface: "include",
       audio: {
         // By default Chrome strips audio that originates from the capturing tab
         // (anti-feedback "restrictOwnAudio"). That silences an embedded player
