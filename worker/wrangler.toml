@@ -5,7 +5,7 @@ compatibility_date = "2024-12-01"
 # Origins allowed to use the proxy. Update the github.io URL to your own.
 # Leave this var out entirely to allow any origin (not recommended once public).
 [vars]
-ALLOWED_ORIGINS = "http://localhost:8000,https://YOUR_USERNAME.github.io"
+ALLOWED_ORIGINS = "http://localhost:8000,https://samadasyed.github.io"
 # How the key is sent to Gemini. "key" for a standard API key (default);
 # switch to "access_token" only if auth is rejected with a token-style credential.
 AUTH_PARAM = "key"
