@@ -128,18 +128,21 @@ a:hover { text-decoration: underline; }
 .link-btn.active { color: var(--accent); }
 
 /* ===== Transcript ===== */
-.transcript-panel { border: 1px solid var(--line); border-radius: 6px; background: var(--bg-elev); }
+.cap-panel { border: 1px solid var(--line); border-radius: 6px; background: var(--bg-elev); }
 .panel-head {
   display: flex; justify-content: space-between; align-items: center;
   padding: 11px 14px; border-bottom: 1px solid var(--line);
   font-size: 11.5px; letter-spacing: .16em; color: #cfcfcf;
 }
-.transcript { max-height: 260px; overflow-y: auto; padding: 12px 14px; }
-.transcript p { margin: 0 0 12px; line-height: 1.5; font-size: 15px; }
-.transcript p .ts { color: var(--accent); font-family: var(--mono); font-size: 11px; margin-right: 8px; }
-.transcript p.live { color: #e8e8e8; }
-.transcript p.live .ts { animation: pulse 1.2s ease-in-out infinite; }
-.transcript-empty { font-size: 12px; }
+.cap-log { max-height: 300px; overflow-y: auto; padding: 14px 16px; }
+.cap-log p { margin: 0 0 10px; line-height: 1.45; font-size: 16px; }
+.cap-log p.current { color: #fff; }
+.cap-log p.current::after {
+  content: "▍"; color: var(--accent); margin-left: 2px;
+  animation: pulse 1s steps(1) infinite;
+}
+.cap-log p.done { color: #b8b8b8; }
+.cap-empty { font-size: 12px; }
 
 /* ===== Controls ===== */
 .controls {

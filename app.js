@@ -53,7 +53,7 @@ const $ = (id) => document.getElementById(id);
 const els = {};
 [
   "marqueeTrack","captions","liveBadge","sourceLabel","srcDemoBtn","srcLiveBtn",
-  "clearTranscript","transcript","keyField","apiKey","toggleKey","rememberKey",
+  "clearCaptions","capLog","keyField","apiKey","toggleKey","rememberKey",
   "sharedKeyNote","targetLang","origVol","origVolVal","transVol","transVolVal",
   "playTranslated","startBtn","stopBtn","status","statusDot","statusText",
 ].forEach((id) => (els[id] = $(id)));
@@ -77,7 +77,7 @@ const state = {
   nextPlayTime: 0,
   captionBuffer: "",
   captionTimer: null,
-  liveEntry: null,
+  capLine: null,
 };
 
 /* ===================================================================== */
@@ -137,10 +137,10 @@ function wireEvents() {
   els.srcDemoBtn.onclick = () => switchSource("demo");
   els.srcLiveBtn.onclick = () => switchSource("live");
 
-  els.clearTranscript.onclick = () => {
-    state.liveEntry = null;
-    els.transcript.innerHTML =
-      '<div class="transcript-empty mono muted">Translated text will appear here once you start.</div>';
+  els.clearCaptions.onclick = () => {
+    state.capLine = null;
+    els.capLog.innerHTML =
+      '<div class="cap-empty mono muted">Captions will appear here in real time once you start.</div>';
   };
 
   els.startBtn.onclick = start;
@@ -275,8 +275,8 @@ function stop(reason) {
   state.transGain = null;
   state.nextPlayTime = 0;
 
-  // commit any in-progress caption line and clear the overlay
-  finalizeCaption();
+  // end any in-progress caption line and clear the overlay
+  endCaptionLine();
   els.captions.innerHTML = "";
 
   els.startBtn.hidden = false;
@@ -403,7 +403,7 @@ function handleServerMessage(msg) {
         if (p.inlineData && p.inlineData.data) playPcm(p.inlineData.data);
       }
     }
-    if (sc.turnComplete || sc.generationComplete) finalizeCaption();
+    if (sc.turnComplete || sc.generationComplete) endCaptionLine();
   }
 
   if (msg.error) {
@@ -429,11 +429,11 @@ function sendAudioChunk(b64) {
 /* ===================================================================== */
 function appendCaption(text) {
   state.captionBuffer += text;
-  renderCaption(state.captionBuffer);        // overlay over the video (live)
-  updateLiveTranscript(state.captionBuffer); // transcript log (live)
-  // safety: if no turnComplete arrives, commit the line after a pause
+  renderCaption(state.captionBuffer);   // overlay over the video (live)
+  updateCaptions(state.captionBuffer);  // captions panel (live)
+  // start a fresh line after a natural pause if no turnComplete arrives
   clearTimeout(state.captionTimer);
-  state.captionTimer = setTimeout(finalizeCaption, 2500);
+  state.captionTimer = setTimeout(endCaptionLine, 2500);
 }
 
 function renderCaption(text) {
@@ -444,33 +444,28 @@ function renderCaption(text) {
   els.captions.innerHTML = `<div class="cap-line partial">${escapeHtml(shown)}</div>`;
 }
 
-// Live, in-progress transcript line — updates word-by-word as text streams in.
-function updateLiveTranscript(text) {
+// Live caption line — updates word-by-word as the translation streams in.
+function updateCaptions(text) {
   if (!text.trim()) return;
-  const empty = els.transcript.querySelector(".transcript-empty");
+  const empty = els.capLog.querySelector(".cap-empty");
   if (empty) empty.remove();
-  if (!state.liveEntry) {
-    state.liveEntry = document.createElement("p");
-    state.liveEntry.className = "live";
-    els.transcript.appendChild(state.liveEntry);
+  if (!state.capLine) {
+    state.capLine = document.createElement("p");
+    state.capLine.className = "current";
+    els.capLog.appendChild(state.capLine);
   }
-  state.liveEntry.innerHTML = `<span class="ts">● LIVE</span>${escapeHtml(text)}`;
-  els.transcript.scrollTop = els.transcript.scrollHeight;
+  state.capLine.textContent = text;
+  els.capLog.scrollTop = els.capLog.scrollHeight;
 }
 
-// Commit the current line with a timestamp once a turn completes (or pauses).
-function finalizeCaption() {
+// End the current caption line at a turn boundary; the next text starts fresh.
+function endCaptionLine() {
   clearTimeout(state.captionTimer);
-  const text = state.captionBuffer.trim();
-  if (text) {
-    if (!state.liveEntry) updateLiveTranscript(text);
-    const ts = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-    state.liveEntry.className = "";
-    state.liveEntry.innerHTML = `<span class="ts">${ts}</span>${escapeHtml(text)}`;
-  } else if (state.liveEntry) {
-    state.liveEntry.remove();
+  if (state.capLine) {
+    if (state.captionBuffer.trim()) state.capLine.className = "done";
+    else state.capLine.remove();
   }
-  state.liveEntry = null;
+  state.capLine = null;
   state.captionBuffer = "";
 }
 
