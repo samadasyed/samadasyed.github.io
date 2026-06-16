@@ -32,7 +32,10 @@ export default {
       return new Response("Forbidden origin: " + origin, { status: 403 });
     }
 
-    if (!env.GEMINI_API_KEY) {
+    // Accept either secret name: GEMINI_API_KEY (documented default) or
+    // GEMINI_API_OPENFRONTIER (the name used in this deployment).
+    const apiKey = env.GEMINI_API_KEY || env.GEMINI_API_OPENFRONTIER;
+    if (!apiKey) {
       return new Response("Server missing GEMINI_API_KEY", { status: 500 });
     }
 
@@ -40,8 +43,9 @@ export default {
     // AUTH_PARAM defaults to "key" (standard API key). If your credential is an
     // ephemeral/access token instead, set AUTH_PARAM = "access_token".
     const authParam = (env.AUTH_PARAM || "key").trim();
+    // Workers' fetch() WebSocket upgrade requires an http(s) URL, not wss://.
     const upstreamUrl =
-      `${GEMINI_WS}?${authParam}=${encodeURIComponent(env.GEMINI_API_KEY)}`;
+      `${GEMINI_WS.replace(/^wss:/, "https:")}?${authParam}=${encodeURIComponent(apiKey)}`;
     let upstream;
     try {
       const resp = await fetch(upstreamUrl, {
