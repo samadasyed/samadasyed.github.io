@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Open Frontier // Live Translation</title>
+  <meta name="description" content="Live AI translation of the Open Frontier livestream, powered by Gemini 3.5 Live Translate." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23020202'/><text x='50' y='68' font-size='60' text-anchor='middle' fill='%23f97316' font-family='monospace'>◐</text></svg>" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ===== Top nav ===== -->
+  <header class="nav">
+    <div class="nav-left">
+      <span class="logo">◐ OPEN FRONTIER</span>
+      <span class="sep">//</span>
+      <span class="tag">LIVE TRANSLATION</span>
+    </div>
+    <div class="nav-right mono">
+      <span class="muted">PRESENTED BY</span> LAUDE
+    </div>
+  </header>
+
+  <!-- ===== Scrolling researcher marquee (mirrors openfrontier.ai) ===== -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track" id="marqueeTrack"></div>
+  </div>
+
+  <!-- ===== Hero strip ===== -->
+  <div class="hero mono">
+    LIVE IN SAN FRANCISCO <span class="sep">//</span> JUNE 30, 2026 <span class="sep">//</span> LIVESTREAMED &amp; TRANSLATED WORLDWIDE
+  </div>
+
+  <!-- ===== Main ===== -->
+  <main class="layout">
+    <!-- Video + captions -->
+    <section class="stage">
+      <div class="video-wrap">
+        <div id="player"></div>
+        <!-- YouTube-style caption overlay -->
+        <div class="captions" id="captions"></div>
+        <div class="badge-live" id="liveBadge" hidden>
+          <span class="dot"></span> TRANSLATING
+        </div>
+      </div>
+
+      <div class="stage-meta mono">
+        <div>
+          <span class="muted">SOURCE</span>
+          <span id="sourceLabel">DEMO &middot; NeurIPS 2025 Panel</span>
+        </div>
+        <div class="src-toggle">
+          <button class="link-btn active" data-src="demo" id="srcDemoBtn">DEMO</button>
+          <span class="sep">/</span>
+          <button class="link-btn" data-src="live" id="srcLiveBtn">LIVESTREAM</button>
+        </div>
+      </div>
+
+      <!-- Transcript log -->
+      <div class="transcript-panel">
+        <div class="panel-head mono">
+          <span>TRANSCRIPT</span>
+          <button class="link-btn" id="clearTranscript">CLEAR</button>
+        </div>
+        <div class="transcript" id="transcript">
+          <div class="transcript-empty mono muted">Translated text will appear here once you start.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls -->
+    <aside class="controls">
+      <h2 class="panel-title mono">TRANSLATION CONTROLS</h2>
+
+      <!-- API key -->
+      <div class="field">
+        <label class="mono" for="apiKey">GEMINI API KEY</label>
+        <div class="key-row">
+          <input type="password" id="apiKey" placeholder="paste key when testing" autocomplete="off" spellcheck="false" />
+          <button class="ghost-btn" id="toggleKey" type="button" title="Show / hide">👁</button>
+        </div>
+        <label class="check mono">
+          <input type="checkbox" id="rememberKey" /> remember in this browser
+        </label>
+      </div>
+
+      <!-- Target language -->
+      <div class="field">
+        <label class="mono" for="targetLang">TRANSLATE TO</label>
+        <select id="targetLang"></select>
+      </div>
+
+      <!-- Original audio percentage -->
+      <div class="field">
+        <label class="mono" for="origVol">
+          ORIGINAL AUDIO <span class="val" id="origVolVal">30%</span>
+        </label>
+        <input type="range" id="origVol" min="0" max="100" value="30" />
+        <p class="hint mono">Volume of the original livestream you hear.</p>
+      </div>
+
+      <!-- Translated audio -->
+      <div class="field">
+        <label class="mono" for="transVol">
+          TRANSLATED AUDIO <span class="val" id="transVolVal">100%</span>
+        </label>
+        <input type="range" id="transVol" min="0" max="100" value="100" />
+        <label class="check mono">
+          <input type="checkbox" id="playTranslated" checked /> play translated voice
+        </label>
+      </div>
+
+      <!-- Start / stop -->
+      <button class="primary-btn" id="startBtn">▶ START TRANSLATION</button>
+      <button class="stop-btn" id="stopBtn" hidden>■ STOP</button>
+
+      <!-- Status -->
+      <div class="status mono" id="status">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">IDLE</span>
+      </div>
+
+      <details class="howto">
+        <summary class="mono">HOW IT WORKS / TIPS</summary>
+        <ol class="mono">
+          <li>Paste your Gemini API key and pick a target language.</li>
+          <li>Press <b>Start</b>. Your browser asks what to share &mdash; choose
+            <b>This Tab</b> (or the tab/window playing the stream) and tick
+            <b>Share tab audio</b>.</li>
+          <li>The stream audio is sent to Gemini 3.5 Live Translate; captions and
+            translated voice come back in a few seconds.</li>
+          <li><b>Avoiding echo:</b> for the cleanest translated voice, open the
+            livestream in a <i>separate</i> tab and share that tab, so the
+            translated voice playing here isn&rsquo;t re-captured.</li>
+        </ol>
+      </details>
+    </aside>
+  </main>
+
+  <footer class="foot mono">
+    <span>OPEN FRONTIER // LIVE TRANSLATION</span>
+    <span class="muted">Powered by Gemini 3.5 Live Translate &middot; theme after openfrontier.ai</span>
+    <span><a href="https://www.openfrontier.ai/" target="_blank" rel="noopener">openfrontier.ai ↗</a></span>
+  </footer>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="app.js"></script>
+</body>
+</html>
