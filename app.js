@@ -11,7 +11,7 @@ const CONFIG = {
   // Shared-key proxy. When set (e.g. "wss://openfrontier-translate.<you>.workers.dev"),
   // visitors translate with no key of their own — the Cloudflare Worker injects the key
   // server-side. Leave "" to fall back to bring-your-own-key.
-  proxyUrl: "",
+  proxyUrl: "wss://openfrontier-translate.openfrontier-translate.workers.dev",
   demoVideoId: "mmpW36WdFbI", // NeurIPS 2025 panel (demo)
   liveVideoId: "", // set the Open Frontier livestream video id here on event day
   inputSampleRate: 16000, // Gemini input: 16 kHz PCM16 mono
