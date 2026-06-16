@@ -3,3 +3,7 @@
 .Introduction.md.swp
 node_modules/
 .env
+.dev.vars
+worker/.dev.vars
+.wrangler/
+worker/.wrangler/

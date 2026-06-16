@@ -8,6 +8,10 @@ const CONFIG = {
   model: "models/gemini-3.5-live-translate-preview",
   wsBase:
     "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent",
+  // Shared-key proxy. When set (e.g. "wss://openfrontier-translate.<you>.workers.dev"),
+  // visitors translate with no key of their own — the Cloudflare Worker injects the key
+  // server-side. Leave "" to fall back to bring-your-own-key.
+  proxyUrl: "",
   demoVideoId: "mmpW36WdFbI", // NeurIPS 2025 panel (demo)
   liveVideoId: "", // set the Open Frontier livestream video id here on event day
   inputSampleRate: 16000, // Gemini input: 16 kHz PCM16 mono
@@ -49,9 +53,9 @@ const $ = (id) => document.getElementById(id);
 const els = {};
 [
   "marqueeTrack","captions","liveBadge","sourceLabel","srcDemoBtn","srcLiveBtn",
-  "clearTranscript","transcript","apiKey","toggleKey","rememberKey","targetLang",
-  "origVol","origVolVal","transVol","transVolVal","playTranslated","startBtn",
-  "stopBtn","status","statusDot","statusText",
+  "clearTranscript","transcript","keyField","apiKey","toggleKey","rememberKey",
+  "sharedKeyNote","targetLang","origVol","origVolVal","transVol","transVolVal",
+  "playTranslated","startBtn","stopBtn","status","statusDot","statusText",
 ].forEach((id) => (els[id] = $(id)));
 
 /* ===================================================================== */
@@ -92,12 +96,19 @@ function initUI() {
   const block = NAMES.map((n) => `${n}<span class="dotsep">·</span>`).join("");
   els.marqueeTrack.innerHTML = block + block;
 
-  // remembered key
-  const saved = localStorage.getItem("of_gemini_key");
-  if (saved) {
-    els.apiKey.value = saved;
-    els.rememberKey.checked = true;
+  // shared-key proxy: hide the key field, show the "shared key active" note
+  if (CONFIG.proxyUrl) {
+    els.keyField.hidden = true;
+    els.sharedKeyNote.hidden = false;
+  } else {
+    // bring-your-own-key: restore a remembered key
+    const saved = localStorage.getItem("of_gemini_key");
+    if (saved) {
+      els.apiKey.value = saved;
+      els.rememberKey.checked = true;
+    }
   }
+
   const savedLang = localStorage.getItem("of_lang");
   if (savedLang) els.targetLang.value = savedLang;
 
@@ -197,14 +208,17 @@ function setStatus(text, cls) {
 /* START / STOP                                                           */
 /* ===================================================================== */
 async function start() {
+  const useProxy = !!CONFIG.proxyUrl;
   const apiKey = els.apiKey.value.trim();
-  if (!apiKey) {
-    setStatus("ENTER API KEY FIRST", "error");
-    els.apiKey.focus();
-    return;
+  if (!useProxy) {
+    if (!apiKey) {
+      setStatus("ENTER API KEY FIRST", "error");
+      els.apiKey.focus();
+      return;
+    }
+    if (els.rememberKey.checked) localStorage.setItem("of_gemini_key", apiKey);
+    else localStorage.removeItem("of_gemini_key");
   }
-  if (els.rememberKey.checked) localStorage.setItem("of_gemini_key", apiKey);
-  else localStorage.removeItem("of_gemini_key");
 
   els.startBtn.disabled = true;
   setStatus("REQUESTING AUDIO…", "connecting");
@@ -308,7 +322,10 @@ function setupAudioGraph() {
 /* ===================================================================== */
 function connectWebSocket(apiKey) {
   setStatus("CONNECTING…", "connecting");
-  const url = `${CONFIG.wsBase}?key=${encodeURIComponent(apiKey)}`;
+  // Proxy mode: connect to the Worker (key added server-side). Otherwise BYO key.
+  const url = CONFIG.proxyUrl
+    ? CONFIG.proxyUrl
+    : `${CONFIG.wsBase}?key=${encodeURIComponent(apiKey)}`;
   const ws = new WebSocket(url);
   state.ws = ws;
 
@@ -339,7 +356,10 @@ function connectWebSocket(apiKey) {
   };
 
   ws.onerror = () => {
-    setStatus("CONNECTION ERROR — CHECK API KEY", "error");
+    setStatus(
+      CONFIG.proxyUrl ? "CONNECTION ERROR — PROXY UNREACHABLE" : "CONNECTION ERROR — CHECK API KEY",
+      "error"
+    );
   };
 
   ws.onclose = (e) => {

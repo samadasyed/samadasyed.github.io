@@ -203,6 +203,13 @@ input[type="range"]::-moz-range-thumb {
 .status-dot.connecting { background: var(--blue); animation: pulse 1s infinite; }
 .status-dot.error { background: #ff4d4d; }
 
+.badge-shared {
+  display: inline-block; font-size: 11px; letter-spacing: .14em;
+  color: var(--accent); border: 1px solid var(--accent); border-radius: 999px;
+  padding: 5px 12px; background: rgba(217,84,22,.12);
+}
+.shared-note .hint { margin-top: 9px; }
+
 .howto { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 14px; }
 .howto summary { cursor: pointer; font-size: 11px; letter-spacing: .14em; color: var(--muted); }
 .howto summary:hover { color: #fff; }

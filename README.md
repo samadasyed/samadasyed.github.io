@@ -21,8 +21,21 @@ It mirrors the openfrontier.ai theme: near-black background, white text, orange
 - **Demo / Livestream** toggle — ships with a NeurIPS 2025 panel as the demo;
   drop in the real livestream ID on event day.
 
-Everything runs **100% in the browser** — no backend — so it hosts cleanly on
-GitHub Pages. Your Gemini API key is entered at runtime and never committed.
+The site runs on **GitHub Pages**. There are two ways to authenticate:
+
+- **Bring-your-own-key** (default): each visitor pastes their own Gemini key,
+  entered at runtime and never committed.
+- **Shared key** (keyless for visitors): a tiny free **Cloudflare Worker** holds
+  your key server-side and proxies the Gemini Live WebSocket, so anyone can
+  translate without a key and the key never ships to the browser. See
+  [`worker/README.md`](worker/README.md). Set `CONFIG.proxyUrl` in `app.js` to
+  your Worker's `wss://…workers.dev` URL to switch the site into shared mode —
+  the key field disappears and a “✓ SHARED KEY ACTIVE” badge shows instead.
+
+> ⚠️ **Do not embed a raw API key directly in the page.** A GitHub Pages site is
+> fully public source, so an embedded key is visible to everyone, can be abused
+> on your bill, and is usually auto-revoked by secret scanning. The Worker proxy
+> exists precisely to avoid this.
 
 ---
 

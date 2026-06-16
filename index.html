@@ -72,8 +72,8 @@
     <aside class="controls">
       <h2 class="panel-title mono">TRANSLATION CONTROLS</h2>
 
-      <!-- API key -->
-      <div class="field">
+      <!-- API key (hidden automatically when a shared proxy is configured) -->
+      <div class="field" id="keyField">
         <label class="mono" for="apiKey">GEMINI API KEY</label>
         <div class="key-row">
           <input type="password" id="apiKey" placeholder="paste key when testing" autocomplete="off" spellcheck="false" />
@@ -82,6 +82,12 @@
         <label class="check mono">
           <input type="checkbox" id="rememberKey" /> remember in this browser
         </label>
+      </div>
+
+      <!-- Shown instead of the key field when the shared proxy is on -->
+      <div class="field shared-note" id="sharedKeyNote" hidden>
+        <span class="badge-shared mono">✓ SHARED KEY ACTIVE</span>
+        <p class="hint mono">No key needed — translation is ready to go.</p>
       </div>
 
       <!-- Target language -->
