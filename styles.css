@@ -157,6 +157,8 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer; border: 2px solid #020202;
 }
 .hint { font-size: 10.5px; color: var(--muted); margin: 7px 0 0; letter-spacing: .02em; }
+.hint.warn { color: var(--accent); }
+.hint.warn b { color: #fff; }
 
 .primary-btn {
   width: 100%; background: var(--accent); color: #1a0c02; border: none;
