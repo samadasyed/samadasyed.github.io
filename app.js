@@ -52,7 +52,7 @@ const NAMES = [
 const $ = (id) => document.getElementById(id);
 const els = {};
 [
-  "marqueeTrack","captions","liveBadge","sourceLabel","srcDemoBtn","srcLiveBtn",
+  "marqueeTrack","sourceLabel","srcDemoBtn","srcLiveBtn",
   "clearCaptions","capLog","keyField","apiKey","toggleKey","rememberKey",
   "sharedKeyNote","targetLang","origVol","origVolVal","transVol","transVolVal",
   "playTranslated","startBtn","stopBtn","status","statusDot","statusText",
@@ -275,14 +275,12 @@ function stop(reason) {
   state.transGain = null;
   state.nextPlayTime = 0;
 
-  // end any in-progress caption line and clear the overlay
+  // end any in-progress caption line
   endCaptionLine();
-  els.captions.innerHTML = "";
 
   els.startBtn.hidden = false;
   els.startBtn.disabled = false;
   els.stopBtn.hidden = true;
-  els.liveBadge.hidden = true;
   setStatus(reason || "IDLE", reason === "ERROR" ? "error" : "");
 }
 
@@ -384,7 +382,6 @@ function handleServerMessage(msg) {
     state.running = true;
     els.startBtn.hidden = true;
     els.stopBtn.hidden = false;
-    els.liveBadge.hidden = false;
     setStatus("LIVE · TRANSLATING", "live");
     if (state.player && state.player.playVideo) state.player.playVideo();
     return;
@@ -429,19 +426,10 @@ function sendAudioChunk(b64) {
 /* ===================================================================== */
 function appendCaption(text) {
   state.captionBuffer += text;
-  renderCaption(state.captionBuffer);   // overlay over the video (live)
   updateCaptions(state.captionBuffer);  // captions panel (live)
   // start a fresh line after a natural pause if no turnComplete arrives
   clearTimeout(state.captionTimer);
   state.captionTimer = setTimeout(endCaptionLine, 2500);
-}
-
-function renderCaption(text) {
-  if (!text.trim()) { els.captions.innerHTML = ""; return; }
-  // keep it to the last ~2 lines worth of words
-  const words = text.trim().split(/\s+/);
-  const shown = words.slice(-24).join(" ");
-  els.captions.innerHTML = `<div class="cap-line partial">${escapeHtml(shown)}</div>`;
 }
 
 // Live caption line — updates word-by-word as the translation streams in.
