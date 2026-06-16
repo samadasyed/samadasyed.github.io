@@ -24,6 +24,7 @@ wrangler login
 
 # 2. Store your real Gemini key as a secret (paste it when prompted).
 #    It is never written to any file or committed to git.
+#    The Worker accepts either GEMINI_API_KEY or GEMINI_API_OPENFRONTIER.
 wrangler secret put GEMINI_API_KEY
 
 # 3. Edit wrangler.toml -> ALLOWED_ORIGINS: set your GitHub Pages URL,
