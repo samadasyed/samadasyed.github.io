@@ -1,9 +1,4 @@
-.DS_Store
-*.swp
-.Introduction.md.swp
+.wrangler/
 node_modules/
 .env
 .dev.vars
-worker/.dev.vars
-.wrangler/
-worker/.wrangler/
