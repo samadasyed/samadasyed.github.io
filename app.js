@@ -77,6 +77,7 @@ const state = {
   nextPlayTime: 0,
   captionBuffer: "",
   captionTimer: null,
+  liveEntry: null,
 };
 
 /* ===================================================================== */
@@ -137,6 +138,7 @@ function wireEvents() {
   els.srcLiveBtn.onclick = () => switchSource("live");
 
   els.clearTranscript.onclick = () => {
+    state.liveEntry = null;
     els.transcript.innerHTML =
       '<div class="transcript-empty mono muted">Translated text will appear here once you start.</div>';
   };
@@ -272,6 +274,10 @@ function stop(reason) {
   if (state.playbackCtx) { state.playbackCtx.close().catch(() => {}); state.playbackCtx = null; }
   state.transGain = null;
   state.nextPlayTime = 0;
+
+  // commit any in-progress caption line and clear the overlay
+  finalizeCaption();
+  els.captions.innerHTML = "";
 
   els.startBtn.hidden = false;
   els.startBtn.disabled = false;
@@ -423,8 +429,9 @@ function sendAudioChunk(b64) {
 /* ===================================================================== */
 function appendCaption(text) {
   state.captionBuffer += text;
-  renderCaption(state.captionBuffer);
-  // safety: if no turnComplete arrives, finalize after a pause
+  renderCaption(state.captionBuffer);        // overlay over the video (live)
+  updateLiveTranscript(state.captionBuffer); // transcript log (live)
+  // safety: if no turnComplete arrives, commit the line after a pause
   clearTimeout(state.captionTimer);
   state.captionTimer = setTimeout(finalizeCaption, 2500);
 }
@@ -437,21 +444,34 @@ function renderCaption(text) {
   els.captions.innerHTML = `<div class="cap-line partial">${escapeHtml(shown)}</div>`;
 }
 
+// Live, in-progress transcript line — updates word-by-word as text streams in.
+function updateLiveTranscript(text) {
+  if (!text.trim()) return;
+  const empty = els.transcript.querySelector(".transcript-empty");
+  if (empty) empty.remove();
+  if (!state.liveEntry) {
+    state.liveEntry = document.createElement("p");
+    state.liveEntry.className = "live";
+    els.transcript.appendChild(state.liveEntry);
+  }
+  state.liveEntry.innerHTML = `<span class="ts">● LIVE</span>${escapeHtml(text)}`;
+  els.transcript.scrollTop = els.transcript.scrollHeight;
+}
+
+// Commit the current line with a timestamp once a turn completes (or pauses).
 function finalizeCaption() {
   clearTimeout(state.captionTimer);
   const text = state.captionBuffer.trim();
-  if (text) addTranscript(text);
+  if (text) {
+    if (!state.liveEntry) updateLiveTranscript(text);
+    const ts = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    state.liveEntry.className = "";
+    state.liveEntry.innerHTML = `<span class="ts">${ts}</span>${escapeHtml(text)}`;
+  } else if (state.liveEntry) {
+    state.liveEntry.remove();
+  }
+  state.liveEntry = null;
   state.captionBuffer = "";
-}
-
-function addTranscript(text) {
-  const empty = els.transcript.querySelector(".transcript-empty");
-  if (empty) empty.remove();
-  const ts = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-  const p = document.createElement("p");
-  p.innerHTML = `<span class="ts">${ts}</span>${escapeHtml(text)}`;
-  els.transcript.appendChild(p);
-  els.transcript.scrollTop = els.transcript.scrollHeight;
 }
 
 function escapeHtml(s) {

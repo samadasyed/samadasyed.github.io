@@ -137,6 +137,8 @@ a:hover { text-decoration: underline; }
 .transcript { max-height: 260px; overflow-y: auto; padding: 12px 14px; }
 .transcript p { margin: 0 0 12px; line-height: 1.5; font-size: 15px; }
 .transcript p .ts { color: var(--accent); font-family: var(--mono); font-size: 11px; margin-right: 8px; }
+.transcript p.live { color: #e8e8e8; }
+.transcript p.live .ts { animation: pulse 1.2s ease-in-out infinite; }
 .transcript-empty { font-size: 12px; }
 
 /* ===== Controls ===== */

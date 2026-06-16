@@ -129,15 +129,18 @@
       <details class="howto">
         <summary class="mono">HOW IT WORKS / TIPS</summary>
         <ol class="mono">
-          <li>Paste your Gemini API key and pick a target language.</li>
-          <li>Press <b>Start</b>. Your browser asks what to share &mdash; choose
-            <b>This Tab</b> (or the tab/window playing the stream) and tick
-            <b>Share tab audio</b>.</li>
-          <li>The stream audio is sent to Gemini 3.5 Live Translate; captions and
-            translated voice come back in a few seconds.</li>
-          <li><b>Avoiding echo:</b> for the cleanest translated voice, open the
-            livestream in a <i>separate</i> tab and share that tab, so the
-            translated voice playing here isn&rsquo;t re-captured.</li>
+          <li>Pick a target language and press <b>Start</b>. Your browser asks
+            what to share &mdash; choose a <b>Chrome Tab</b> and tick
+            <b>Also share tab audio</b>.</li>
+          <li>The stream audio is sent to Gemini 3.5 Live Translate; live captions
+            and the translated voice come back a few seconds behind.</li>
+          <li><b>Captions off the embedded player:</b> share <b>This Tab</b> and
+            turn <b>off</b> &ldquo;play translated voice&rdquo;. Captions stay
+            live and there&rsquo;s no echo.</li>
+          <li><b>Translated voice too:</b> open the stream in a <i>separate</i>
+            tab and share that tab. The voice plays here, the original plays
+            there, so nothing is re-captured. (A cross-origin YouTube player
+            can&rsquo;t be tapped directly &mdash; tab sharing is the way in.)</li>
         </ol>
       </details>
     </aside>
