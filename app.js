@@ -55,7 +55,7 @@ const els = {};
   "marqueeTrack","sourceLabel","srcDemoBtn","srcLiveBtn",
   "clearCaptions","capLog","keyField","apiKey","toggleKey","rememberKey",
   "sharedKeyNote","targetLang","origVol","origVolVal","transVol","transVolVal",
-  "playTranslated","startBtn","stopBtn","status","statusDot","statusText",
+  "playTranslated","echoGuard","startBtn","stopBtn","status","statusDot","statusText",
 ].forEach((id) => (els[id] = $(id)));
 
 /* ===================================================================== */
@@ -75,6 +75,7 @@ const state = {
   playbackCtx: null,
   transGain: null,
   nextPlayTime: 0,
+  voicePlayingUntil: 0,
   captionBuffer: "",
   captionTimer: null,
   capLine: null,
@@ -294,6 +295,7 @@ function stop(reason) {
   if (state.playbackCtx) { state.playbackCtx.close().catch(() => {}); state.playbackCtx = null; }
   state.transGain = null;
   state.nextPlayTime = 0;
+  state.voicePlayingUntil = 0;
 
   // end any in-progress caption line
   endCaptionLine();
@@ -328,6 +330,9 @@ function setupAudioGraph() {
   state.processor = state.inputCtx.createScriptProcessor(4096, 1, 1);
   state.processor.onaudioprocess = (e) => {
     if (!state.sessionReady || !state.running) return;
+    // Echo guard: while our translated voice is playing, stop sending captured
+    // audio — otherwise (same-tab capture) the voice is re-captured and loops.
+    if (els.echoGuard.checked && performance.now() < state.voicePlayingUntil) return;
     const input = e.inputBuffer.getChannelData(0);
     const down = downsample(input, state.inputCtx.sampleRate, CONFIG.inputSampleRate);
     const b64 = floatToPcm16Base64(down);
@@ -546,6 +551,11 @@ function playPcm(b64) {
   if (state.nextPlayTime < now) state.nextPlayTime = now + 0.05;
   src.start(state.nextPlayTime);
   state.nextPlayTime += buffer.duration;
+  // Tell the echo guard how long the voice stays audible (wall clock + tail for
+  // the capture pipeline latency), so we don't re-capture our own output.
+  const tailMs = 300;
+  state.voicePlayingUntil =
+    performance.now() + Math.max(0, state.nextPlayTime - ctx.currentTime) * 1000 + tailMs;
 }
 
 /* ===================================================================== */
