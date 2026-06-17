@@ -55,7 +55,7 @@ const els = {};
   "marqueeTrack","sourceLabel","srcDemoBtn","srcLiveBtn",
   "clearCaptions","capLog","keyField","apiKey","toggleKey","rememberKey",
   "sharedKeyNote","targetLang","origVol","origVolVal","transVol","transVolVal",
-  "playTranslated","echoGuard","startBtn","stopBtn","status","statusDot","statusText",
+  "playTranslated","popupVoice","startBtn","stopBtn","status","statusDot","statusText",
 ].forEach((id) => (els[id] = $(id)));
 
 /* ===================================================================== */
@@ -75,7 +75,7 @@ const state = {
   playbackCtx: null,
   transGain: null,
   nextPlayTime: 0,
-  voicePlayingUntil: 0,
+  voiceWin: null,
   captionBuffer: "",
   captionTimer: null,
   capLine: null,
@@ -131,9 +131,23 @@ function wireEvents() {
   };
   els.transVol.oninput = () => {
     els.transVolVal.textContent = els.transVol.value + "%";
-    if (state.transGain)
-      state.transGain.gain.value = parseInt(els.transVol.value, 10) / 100;
+    const v = parseInt(els.transVol.value, 10) / 100;
+    if (state.transGain) state.transGain.gain.value = v;
+    sendToVoiceWin({ type: "volume", value: v });
   };
+
+  // messages from the translated-voice pop-up
+  window.addEventListener("message", (e) => {
+    if (e.origin !== location.origin) return;
+    const m = e.data || {};
+    if (m.type === "ready") {
+      sendToVoiceWin({ type: "volume", value: parseInt(els.transVol.value, 10) / 100 });
+    } else if (m.type === "needsClick") {
+      setStatus("CLICK ‘ENABLE SOUND’ IN THE VOICE WINDOW", "connecting");
+    } else if (m.type === "playing") {
+      if (state.running) setStatus("LIVE · TRANSLATING", "live");
+    }
+  });
 
   els.srcDemoBtn.onclick = () => switchSource("demo");
   els.srcLiveBtn.onclick = () => switchSource("live");
@@ -226,6 +240,20 @@ async function start() {
   els.startBtn.disabled = true;
   setStatus("REQUESTING AUDIO…", "connecting");
 
+  // 0) Open the translated-voice pop-up now, while we still hold the user gesture.
+  if (els.playTranslated.checked && els.popupVoice.checked) {
+    state.voiceWin = openVoiceWindow();
+    if (!state.voiceWin) {
+      alert(
+        "Please allow pop-ups for this site so the translated voice can play in its " +
+        "own window (this avoids the echo loop when sharing a tab), then press Start again."
+      );
+      setStatus("ALLOW POP-UPS, THEN START", "error");
+      els.startBtn.disabled = false;
+      return;
+    }
+  }
+
   // 1) Capture tab/screen audio
   try {
     state.captureStream = await navigator.mediaDevices.getDisplayMedia({
@@ -295,7 +323,12 @@ function stop(reason) {
   if (state.playbackCtx) { state.playbackCtx.close().catch(() => {}); state.playbackCtx = null; }
   state.transGain = null;
   state.nextPlayTime = 0;
-  state.voicePlayingUntil = 0;
+
+  // close the translated-voice pop-up
+  if (state.voiceWin && !state.voiceWin.closed) {
+    try { state.voiceWin.postMessage({ type: "stop" }, location.origin); state.voiceWin.close(); } catch (_) {}
+  }
+  state.voiceWin = null;
 
   // end any in-progress caption line
   endCaptionLine();
@@ -330,9 +363,6 @@ function setupAudioGraph() {
   state.processor = state.inputCtx.createScriptProcessor(4096, 1, 1);
   state.processor.onaudioprocess = (e) => {
     if (!state.sessionReady || !state.running) return;
-    // Echo guard: while our translated voice is playing, stop sending captured
-    // audio — otherwise (same-tab capture) the voice is re-captured and loops.
-    if (els.echoGuard.checked && performance.now() < state.voicePlayingUntil) return;
     const input = e.inputBuffer.getChannelData(0);
     const down = downsample(input, state.inputCtx.sampleRate, CONFIG.inputSampleRate);
     const b64 = floatToPcm16Base64(down);
@@ -539,7 +569,14 @@ function base64ToFloat32(b64) {
 }
 
 function playPcm(b64) {
-  if (!els.playTranslated.checked || !state.playbackCtx) return;
+  if (!els.playTranslated.checked) return;
+  // Separate-window mode: hand the audio to the pop-up so it plays outside the
+  // captured tab and can't be re-captured (no echo loop, full quality).
+  if (els.popupVoice.checked) {
+    sendToVoiceWin({ type: "audio", data: b64, rate: CONFIG.outputSampleRate });
+    return;
+  }
+  if (!state.playbackCtx) return;
   const float32 = base64ToFloat32(b64);
   const ctx = state.playbackCtx;
   const buffer = ctx.createBuffer(1, float32.length, CONFIG.outputSampleRate);
@@ -551,11 +588,20 @@ function playPcm(b64) {
   if (state.nextPlayTime < now) state.nextPlayTime = now + 0.05;
   src.start(state.nextPlayTime);
   state.nextPlayTime += buffer.duration;
-  // Tell the echo guard how long the voice stays audible (wall clock + tail for
-  // the capture pipeline latency), so we don't re-capture our own output.
-  const tailMs = 300;
-  state.voicePlayingUntil =
-    performance.now() + Math.max(0, state.nextPlayTime - ctx.currentTime) * 1000 + tailMs;
+}
+
+function openVoiceWindow() {
+  try {
+    return window.open("player.html", "ofTranslatedVoice", "width=380,height=270");
+  } catch (_) {
+    return null;
+  }
+}
+
+function sendToVoiceWin(msg) {
+  if (state.voiceWin && !state.voiceWin.closed) {
+    try { state.voiceWin.postMessage(msg, location.origin); } catch (_) {}
+  }
 }
 
 /* ===================================================================== */

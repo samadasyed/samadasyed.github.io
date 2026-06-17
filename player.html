@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Translated Voice // Open Frontier</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #020202; color: #fff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .wrap { height: 100%; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 16px; text-align: center; padding: 22px; box-sizing: border-box; }
+    h1 { font-size: 13px; letter-spacing: .2em; color: #f97316; margin: 0; }
+    button { background: #f97316; color: #1a0c02; border: none; border-radius: 6px;
+      padding: 14px 22px; font-family: inherit; font-weight: 700; letter-spacing: .08em;
+      font-size: 14px; cursor: pointer; }
+    button:hover { background: #ef8343; }
+    .status { font-size: 12px; letter-spacing: .1em; color: #8a8a8a; }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: #8a8a8a; margin-right: 7px; vertical-align: middle; }
+    .dot.live { background: #f97316; box-shadow: 0 0 8px #f97316; }
+    .hint { font-size: 10.5px; color: #8a8a8a; max-width: 300px; line-height: 1.55; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>◐ TRANSLATED VOICE</h1>
+    <button id="enable">🔊 ENABLE SOUND</button>
+    <div class="status"><span class="dot" id="dot"></span><span id="status">Waiting…</span></div>
+    <div class="hint">Keep this window open. The translated voice plays here so it isn’t
+      re-captured by the tab you’re sharing — full quality, no echo loop.</div>
+  </div>
+  <script>
+    const OUT_RATE = 24000;
+    let ctx = null, gain = null, nextTime = 0, volume = 1, started = false, warnedClick = false;
+    const statusEl = document.getElementById("status");
+    const dotEl = document.getElementById("dot");
+    const enableBtn = document.getElementById("enable");
+
+    function setStatus(t, live) { statusEl.textContent = t; dotEl.className = "dot" + (live ? " live" : ""); }
+    function post(msg) { if (window.opener && !window.opener.closed) window.opener.postMessage(msg, location.origin); }
+
+    function ensureCtx() {
+      if (!ctx) {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        gain = ctx.createGain(); gain.gain.value = volume; gain.connect(ctx.destination);
+        nextTime = 0;
+      }
+      return ctx;
+    }
+
+    function enable() {
+      ensureCtx();
+      ctx.resume().then(() => {
+        started = true;
+        enableBtn.style.display = "none";
+        setStatus("Ready · receiving voice", true);
+        post({ type: "playing" });
+      }).catch(() => {});
+    }
+
+    enableBtn.addEventListener("click", enable);
+    document.body.addEventListener("click", () => { if (!started) enable(); });
+
+    function b64ToFloat32(b64) {
+      const bin = atob(b64), len = bin.length, bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) bytes[i] = bin.charCodeAt(i);
+      const view = new DataView(bytes.buffer), n = len / 2, out = new Float32Array(n);
+      for (let i = 0; i < n; i++) out[i] = view.getInt16(i * 2, true) / 0x8000;
+      return out;
+    }
+
+    function playChunk(b64, rate) {
+      if (!ctx || ctx.state !== "running") return;
+      const f32 = b64ToFloat32(b64);
+      const buf = ctx.createBuffer(1, f32.length, rate || OUT_RATE);
+      buf.getChannelData(0).set(f32);
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.connect(gain);
+      const now = ctx.currentTime;
+      if (nextTime < now) nextTime = now + 0.05;
+      src.start(nextTime); nextTime += buf.duration;
+    }
+
+    window.addEventListener("message", (e) => {
+      if (e.origin !== location.origin) return;
+      const m = e.data || {};
+      if (m.type === "audio") {
+        if (!started) { if (!warnedClick) { warnedClick = true; post({ type: "needsClick" }); } return; }
+        playChunk(m.data, m.rate);
+      } else if (m.type === "volume") {
+        volume = m.value; if (gain) gain.gain.value = volume;
+      } else if (m.type === "stop") {
+        setStatus("Stopped"); try { ctx && ctx.close(); } catch (_) {} ctx = null; started = false;
+      }
+    });
+
+    window.addEventListener("load", () => {
+      post({ type: "ready" });
+      ensureCtx();
+      if (ctx.state === "running") enable();        // sometimes allowed via the opener gesture
+      else setStatus("Click “Enable sound”");
+    });
+    window.addEventListener("beforeunload", () => post({ type: "closed" }));
+  </script>
+</body>
+</html>
